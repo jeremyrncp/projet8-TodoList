@@ -1,0 +1,22 @@
+language: php
+
+php:
+  - '7.1'
+
+services:
+  - mysql
+
+before_install:
+  - nvm install 8.11.3
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS symfony;'
+
+install:
+  - npm install
+  - composer install
+
+script:
+  - bin/console doctrine:schema:drop --force
+  - bin/console doctrine:schema:create
+  - vendor/bin/simple-phpunit
+  - bin/console server:start
+  - npx cypress run
