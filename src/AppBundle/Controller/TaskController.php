@@ -15,7 +15,11 @@ class TaskController extends Controller
      */
     public function listAction()
     {
-        return $this->render('task/list.html.twig', ['tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findAll()]);
+        $tasksList = $this->getDoctrine()->getRepository('AppBundle:Task')->findBy(
+            ['user' => $this->getUser()]
+        );
+
+        return $this->render('task/list.html.twig', ['tasks' => $tasksList]);
     }
 
     /**
@@ -30,6 +34,8 @@ class TaskController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+
+            $task->setUser($this->getUser());
 
             $em->persist($task);
             $em->flush();
