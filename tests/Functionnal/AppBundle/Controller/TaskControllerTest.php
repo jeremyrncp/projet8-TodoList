@@ -40,12 +40,19 @@ class TaskControllerTest extends WebTestCase
         $idAnonymousTask = $this->getAnonimousTask()->getId();
 
         foreach (self::ACTIONS as $action) {
-            $client->request('GET', '/tasks/' . $idAnonymousTask. '/' . $action);
+            $crawler = $client->request('GET', '/tasks/' . $idAnonymousTask. '/' . $action);
 
             if ($action === 'toggle') {
                 $this->assertEquals(302, $client->getResponse()->getStatusCode());
             } else {
                 $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+                $form = $crawler->selectButton('Modifier')->form();
+
+                $client->submit($form);
+                $crawler = $client->followRedirect();
+
+                $this->assertContains('La tâche a bien été modifiée.', $crawler->filter('.alert-success')->first()->html());
             }
         }
     }
