@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Enum\RolesEnum;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -46,6 +47,11 @@ class User implements UserInterface
      */
     private $tasks;
 
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $roles = [];
+  
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
@@ -118,9 +124,30 @@ class User implements UserInterface
         $this->email = $email;
     }
 
+    public function addRole(string $role)
+    {
+        if (in_array($role, RolesEnum::ROLES)) {
+            $this->roles[] = $role;
+        }
+    }
+
+    public function setRoles(array $roles)
+    {
+        $this->roles = $roles;
+    }
+
     public function getRoles()
     {
-        return array('ROLE_USER');
+        $roles = $this->roles;
+
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function hasRole(string $role = RolesEnum::ROLE_USER)
+    {
+        return in_array($role, $this->roles);
     }
 
     public function eraseCredentials()

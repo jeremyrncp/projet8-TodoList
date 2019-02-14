@@ -2,7 +2,18 @@
 
 context('Actions', () => {
     beforeEach(() => {
-        cy.visit('http://127.0.0.1:8000/')
+        cy.visit('/')
+
+        cy.get('form[action="/login_check"]').then(($form) => {
+
+            cy.get('#username')
+                .type('admin', {force: true})
+
+            cy.get('#password')
+                .type('test', {force: true})
+
+            cy.get('form[action="/login_check"]').submit()
+        })
     })
 
     it('create an user', () => {

@@ -6,6 +6,7 @@
 
 namespace Tests\Functionnal\AppBundle\Controller;
 
+use Application\DoctrineFixtures\UserFixtures;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class CreateTaskControllerTest extends WebTestCase
@@ -13,7 +14,7 @@ class CreateTaskControllerTest extends WebTestCase
     public function testMustCreateATaskWithAnIdentifiedUser()
     {
         $client = static::createClient([], [
-            'PHP_AUTH_USER' => 'martin',
+            'PHP_AUTH_USER' => UserFixtures::CUD_USERNAME,
             'PHP_AUTH_PW'   => 'test',
         ]);
 
