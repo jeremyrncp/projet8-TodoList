@@ -51,35 +51,9 @@ class Task
      * Task constructor.
      */
 
-    /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User", inversedBy="tasks")
-     * @ORM\JoinColumn(nullable=true, name="user")
-     */
-    private $user;
-
-    /**
-     * Task constructor.
-     */
-
     public function __construct()
     {
         $this->createdAt = new \Datetime();
-    }
-
-    /**
-     * @return User|null
-     */
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param User $user
-     */
-    public function setUser(User $user): void
-    {
-        $this->user = $user;
     }
 
     /**
