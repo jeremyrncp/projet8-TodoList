@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Task;
 use AppBundle\Form\TaskType;
+use AppBundle\Security\TaskVoter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,17 @@ class TaskController extends Controller
      */
     public function listAction()
     {
-        return $this->render('task/list.html.twig', ['tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findAll()]);
+        if ($this->getUser()->hasRole('ROLE_ADMIN')) {
+            $tasksList = $this->getDoctrine()->getRepository('AppBundle:Task')->findUserAndAnonymousTask(
+                $this->getUser()
+            );
+        } else {
+            $tasksList = $this->getDoctrine()->getRepository('AppBundle:Task')->findBy(
+                ['user' => $this->getUser()]
+            );
+        }
+
+        return $this->render('task/list.html.twig', ['tasks' => $tasksList]);
     }
 
     /**
@@ -28,8 +39,10 @@ class TaskController extends Controller
 
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+
+            $task->setUser($this->getUser());
 
             $em->persist($task);
             $em->flush();
@@ -47,11 +60,13 @@ class TaskController extends Controller
      */
     public function editAction(Task $task, Request $request)
     {
+        $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
+
         $form = $this->createForm(TaskType::class, $task);
 
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
             $this->addFlash('success', 'La tâche a bien été modifiée.');
@@ -70,6 +85,8 @@ class TaskController extends Controller
      */
     public function toggleTaskAction(Task $task)
     {
+        $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
+
         $task->toggle(!$task->isDone());
         $this->getDoctrine()->getManager()->flush();
 
@@ -83,6 +100,8 @@ class TaskController extends Controller
      */
     public function deleteTaskAction(Task $task)
     {
+        $this->denyAccessUnlessGranted(TaskVoter::DELETE, $task);
+
         $em = $this->getDoctrine()->getManager();
         $em->remove($task);
         $em->flush();

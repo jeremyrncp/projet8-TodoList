@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -38,6 +39,50 @@ class User implements UserInterface
      * @Assert\Email(message="Le format de l'adresse n'est pas correcte.")
      */
     private $email;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Task", mappedBy="user")
+     */
+    private $tasks;
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $roles = [];
+
+
+    public function __construct()
+    {
+        $this->tasks = new ArrayCollection();
+    }
+
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getTasks(): ArrayCollection
+    {
+        return $this->tasks;
+    }
+
+    /**
+     * @param Task $task
+     */
+    public function addTask(Task $task): void
+    {
+        if (!$this->tasks->contains($task)) {
+            $task->setUser($this);
+            $this->tasks->add($task);
+        }
+    }
+
+    public function removeTask(Task $task)
+    {
+        if ($this->tasks->contains($task)) {
+            $this->tasks->removeElement($task);
+        }
+    }
 
     public function getId()
     {
@@ -79,9 +124,23 @@ class User implements UserInterface
         $this->email = $email;
     }
 
+    public function setRoles(array $roles)
+    {
+        $this->roles = $roles;
+    }
+
     public function getRoles()
     {
-        return array('ROLE_USER');
+        $roles = $this->roles;
+
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function hasRole(string $role)
+    {
+        return in_array($role, $this->roles);
     }
 
     public function eraseCredentials()

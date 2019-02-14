@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\TaskRepository")
  * @ORM\Table
  */
 class Task
@@ -38,12 +38,37 @@ class Task
     /**
      * @ORM\Column(type="boolean")
      */
-    private $isDone;
+    private $isDone = false;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User", inversedBy="tasks")
+     * @ORM\JoinColumn(nullable=true, name="user")
+     */
+    private $user;
+
+    /**
+     * Task constructor.
+     */
 
     public function __construct()
     {
         $this->createdAt = new \Datetime();
-        $this->isDone = false;
+    }
+
+    /**
+     * @return User|null
+     */
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param User $user
+     */
+    public function setUser(User $user): void
+    {
+        $this->user = $user;
     }
 
     public function getId()

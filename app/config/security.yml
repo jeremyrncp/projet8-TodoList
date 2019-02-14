@@ -1,4 +1,8 @@
 security:
+    access_decision_manager:
+        strategy: unanimous
+        allow_if_all_abstain: false
+
     encoders:
         AppBundle\Entity\User: bcrypt
 
@@ -19,10 +23,9 @@ security:
             form_login:
                 login_path: login
                 check_path: login_check
-                always_use_default_target_path:  true
                 default_target_path:  /
             logout: ~
-
+            logout_on_user_change: true
     access_control:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/users, roles: IS_AUTHENTICATED_ANONYMOUSLY }
