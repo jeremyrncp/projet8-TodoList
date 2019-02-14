@@ -1,6 +1,11 @@
 ToDoList
 ========
 
-Base du projet #8 : Améliorez un projet existant
+Pour installer le projet :
 
-https://openclassrooms.com/projects/ameliorer-un-projet-existant-1
+- créer deux bases, symfony et symfony_test
+- composer install
+- npm install
+- bin/console doctrine:schema:create
+- bin/console doctrine:fixtures:load
+- composer dump-autoload --optimize --no-dev --classmap-authoritative
