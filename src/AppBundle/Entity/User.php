@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Enum\RolesEnum;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -124,6 +125,13 @@ class User implements UserInterface
         $this->email = $email;
     }
 
+    public function addRole(string $role)
+    {
+        if (in_array($role, RolesEnum::ROLES)) {
+            $this->roles[] = $role;
+        }
+    }
+
     public function setRoles(array $roles)
     {
         $this->roles = $roles;
@@ -138,7 +146,7 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
-    public function hasRole(string $role)
+    public function hasRole(string $role = RolesEnum::ROLE_USER)
     {
         return in_array($role, $this->roles);
     }
