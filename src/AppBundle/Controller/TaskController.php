@@ -25,7 +25,7 @@ class TaskController extends Controller
                 ['user' => $this->getUser()]
             );
         }
-
+      
         return $this->render('task/list.html.twig', ['tasks' => $tasksList]);
     }
 

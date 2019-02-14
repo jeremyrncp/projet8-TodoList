@@ -51,8 +51,7 @@ class User implements UserInterface
      * @ORM\Column(type="json")
      */
     private $roles = [];
-
-
+  
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
