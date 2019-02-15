@@ -3,7 +3,10 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
+use AppBundle\Form\Handler\User\CreateUserHandler;
+use AppBundle\Form\Handler\User\EditUserHandler;
 use AppBundle\Form\UserType;
+use AppBundle\OptionsResolver\FormHandlerOptionsResolver;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,23 +24,16 @@ class UserController extends Controller
     /**
      * @Route("/users/create", name="user_create")
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request, CreateUserHandler $createUserHandler)
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
+        $createUserHandler->setOptionsResolver(new FormHandlerOptionsResolver(['entity' => $user]));
 
-            $em->persist($user);
-            $em->flush();
-
-            $this->addFlash('success', "L'utilisateur a bien été ajouté.");
-
+        if ($createUserHandler->handle($form)) {
             return $this->redirectToRoute('user_list');
         }
 
@@ -47,20 +43,15 @@ class UserController extends Controller
     /**
      * @Route("/users/{id}/edit", name="user_edit")
      */
-    public function editAction(User $user, Request $request)
+    public function editAction(User $user, Request $request, EditUserHandler $editUserHandler)
     {
         $form = $this->createForm(UserType::class, $user);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
+        $editUserHandler->setOptionsResolver(new FormHandlerOptionsResolver(['entity' => $user]));
 
-            $this->getDoctrine()->getManager()->flush();
-
-            $this->addFlash('success', "L'utilisateur a bien été modifié");
-
+        if ($editUserHandler->handle($form)) {
             return $this->redirectToRoute('user_list');
         }
 

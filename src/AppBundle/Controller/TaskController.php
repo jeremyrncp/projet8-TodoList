@@ -3,7 +3,10 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Task;
+use AppBundle\Form\Handler\Task\CreateTaskHandler;
+use AppBundle\Form\Handler\Task\EditTaskHandler;
 use AppBundle\Form\TaskType;
+use AppBundle\OptionsResolver\FormHandlerOptionsResolver;
 use AppBundle\Security\TaskVoter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -31,24 +34,22 @@ class TaskController extends Controller
 
     /**
      * @Route("/tasks/create", name="task_create")
+     *
+     * @param Request $request
+     * @param CreateTaskHandler $createTaskHandler
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \AppBundle\Exception\InvalidTypeException
+     * @throws \AppBundle\Exception\MissingNecessaryOperation
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request, CreateTaskHandler $createTaskHandler)
     {
         $task = new Task();
         $form = $this->createForm(TaskType::class, $task);
-
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+        $createTaskHandler->setOptionsResolver(new FormHandlerOptionsResolver(['entity' => $task]));
 
-            $task->setUser($this->getUser());
-
-            $em->persist($task);
-            $em->flush();
-
-            $this->addFlash('success', 'La tâche a été bien été ajoutée.');
-
+        if ($createTaskHandler->handle($form)) {
             return $this->redirectToRoute('task_list');
         }
 
@@ -57,20 +58,21 @@ class TaskController extends Controller
 
     /**
      * @Route("/tasks/{id}/edit", name="task_edit")
+     *
+     * @param Task $task
+     * @param Request $request
+     * @param EditTaskHandler $editTaskHandler
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \AppBundle\Exception\InvalidTypeException
      */
-    public function editAction(Task $task, Request $request)
+    public function editAction(Task $task, Request $request, EditTaskHandler $editTaskHandler)
     {
         $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
 
         $form = $this->createForm(TaskType::class, $task);
-
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
-
-            $this->addFlash('success', 'La tâche a bien été modifiée.');
-
+        if ($editTaskHandler->handle($form)) {
             return $this->redirectToRoute('task_list');
         }
 
