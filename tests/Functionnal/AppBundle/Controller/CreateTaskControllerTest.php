@@ -31,6 +31,6 @@ class CreateTaskControllerTest extends WebTestCase
         $crawler = $client->submit($form);
         $crawler = $client->followRedirect();
 
-        $this->assertContains('La tâche a été bien été ajoutée.', $crawler->filter('.alert-success')->first()->html());
+        $this->assertContains('La tâche a bien été ajoutée.', $crawler->filter('.alert-success')->first()->html());
     }
 }
